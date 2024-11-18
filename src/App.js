@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 const App = () => {
   const [highScore, setHighScore] = useState(
-    JSON.parse(localStorage.getItem("highScore")) || { name: "", score: 0, time: Infinity }
+    JSON.parse(localStorage.getItem("highScore")) || { name: "", score: 0, time: Infinity, totalRounds: 0, totalMistakes: 0 }
   );
   const [showGame, setShowGame] = useState(true);
 
@@ -12,7 +12,7 @@ const App = () => {
   };
 
   const resetHighScore = () => {
-    setHighScore({ name: "", score: 0, time: Infinity });
+    setHighScore({ name: "", score: 0, time: Infinity, totalRounds: 0, totalMistakes: 0 });
     localStorage.removeItem("highScore");
     alert("Highscore wurde zurückgesetzt.");
   };
@@ -38,6 +38,7 @@ const Game = ({ highScore, updateHighScore, onGameOver }) => {
 
   const [questionNumber, setQuestionNumber] = useState(1);
   const [correctCount, setCorrectCount] = useState(0);
+  const [mistakeCount, setMistakeCount] = useState(0);
   const [startTime] = useState(Date.now());
   const [currentNumber, setCurrentNumber] = useState(generateRandomNumber());
   const [isAnswering, setIsAnswering] = useState(true);
@@ -53,6 +54,7 @@ const Game = ({ highScore, updateHighScore, onGameOver }) => {
       setCorrectCount((prev) => prev + 1);
       nextQuestion();
     } else {
+      setMistakeCount((prev) => prev + 1);
       setIsAnswering(false); // Pause für 2 Sekunden
       setTimeout(() => {
         alert("Falsche Antwort. Versuch es erneut!");
@@ -66,14 +68,18 @@ const Game = ({ highScore, updateHighScore, onGameOver }) => {
       const endTime = Date.now();
       const timeTaken = (endTime - startTime) / 1000;
 
+      const totalRounds = highScore.totalRounds + 1;
+      const totalMistakes = highScore.totalMistakes + mistakeCount;
+
       if (
         correctCount > highScore.score ||
         (correctCount === highScore.score && timeTaken < highScore.time)
       ) {
         const playerName = prompt("Neuer Rekord! Bitte gib deinen Namen ein:");
-        updateHighScore({ name: playerName, score: correctCount, time: timeTaken });
+        updateHighScore({ name: playerName, score: correctCount, time: timeTaken, totalRounds, totalMistakes });
       } else {
         alert("Kein neuer Rekord.");
+        updateHighScore({ ...highScore, totalRounds, totalMistakes });
       }
 
       onGameOver();
@@ -110,7 +116,9 @@ const Result = ({ highScore, onRestart, onResetHighScore }) => {
       <p style={styles.resultText}>
         Name: {highScore.name || "—"} <br />
         Richtige Antworten: {highScore.score} <br />
-        Benötigte Zeit: {highScore.time === Infinity ? "—" : highScore.time.toFixed(2) + " Sekunden"}
+        Benötigte Zeit: {highScore.time === Infinity ? "—" : highScore.time.toFixed(2) + " Sekunden"} <br />
+        Gesamtgespielte Runden: {highScore.totalRounds} <br />
+        Gesamtfehler: {highScore.totalMistakes}
       </p>
       <div style={styles.buttonContainer}>
         <button style={styles.button} onClick={onRestart}>
