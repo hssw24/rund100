@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
-// Hauptkomponente
 const App = () => {
   const [highScore, setHighScore] = useState(
     JSON.parse(localStorage.getItem("highScore")) || { name: "", score: 0, time: Infinity }
@@ -12,19 +11,28 @@ const App = () => {
     localStorage.setItem("highScore", JSON.stringify(newHighScore));
   };
 
+  const resetHighScore = () => {
+    setHighScore({ name: "", score: 0, time: Infinity });
+    localStorage.removeItem("highScore");
+    alert("Highscore wurde zurückgesetzt.");
+  };
+
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>Welcher Hunderter liegt näher?</h1>
       {showGame ? (
         <Game highScore={highScore} updateHighScore={updateHighScore} onGameOver={() => setShowGame(false)} />
       ) : (
-        <Result highScore={highScore} onRestart={() => setShowGame(true)} />
+        <Result
+          highScore={highScore}
+          onRestart={() => setShowGame(true)}
+          onResetHighScore={resetHighScore}
+        />
       )}
     </div>
   );
 };
 
-// Spielkomponente
 const Game = ({ highScore, updateHighScore, onGameOver }) => {
   const generateRandomNumber = () => Math.floor(Math.random() * 1001);
 
@@ -85,25 +93,28 @@ const Game = ({ highScore, updateHighScore, onGameOver }) => {
   );
 };
 
-// Ergebnisanzeige
-const Result = ({ highScore, onRestart }) => {
+const Result = ({ highScore, onRestart, onResetHighScore }) => {
   return (
     <div>
       <h2 style={styles.subTitle}>Spiel beendet!</h2>
       <h3 style={styles.question}>Highscore</h3>
       <p style={styles.resultText}>
-        Name: {highScore.name} <br />
+        Name: {highScore.name || "—"} <br />
         Richtige Antworten: {highScore.score} <br />
-        Benötigte Zeit: {highScore.time.toFixed(2)} Sekunden
+        Benötigte Zeit: {highScore.time === Infinity ? "—" : highScore.time.toFixed(2) + " Sekunden"}
       </p>
-      <button style={styles.button} onClick={onRestart}>
-        Neues Spiel starten
-      </button>
+      <div style={styles.buttonContainer}>
+        <button style={styles.button} onClick={onRestart}>
+          Neues Spiel starten
+        </button>
+        <button style={styles.resetButton} onClick={onResetHighScore}>
+          Highscore zurücksetzen
+        </button>
+      </div>
     </div>
   );
 };
 
-// Stile für responsive Design
 const styles = {
   container: {
     textAlign: "center",
@@ -138,8 +149,15 @@ const styles = {
     cursor: "pointer",
     minWidth: "100px",
   },
-  buttonHover: {
-    backgroundColor: "#0056b3",
+  resetButton: {
+    padding: "15px 20px",
+    fontSize: "16px",
+    backgroundColor: "#FF5733",
+    color: "white",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    minWidth: "100px",
   },
   resultText: {
     fontSize: "16px",
