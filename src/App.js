@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const App = () => {
   const [highScore, setHighScore] = useState(
@@ -58,7 +58,8 @@ const Game = ({ highScore, updateHighScore, onGameOver }) => {
   const [startTime] = useState(Date.now());
   const [currentNumber, setCurrentNumber] = useState(generateRandomNumber());
   const [isAnswering, setIsAnswering] = useState(true);
-  const [timeTaken, setTimeTaken] = useState(0);
+  const [isWrongAnswer, setIsWrongAnswer] = useState(false); // Für roten Hintergrund
+  const [roundTime, setRoundTime] = useState(0); // Speichert die Zeit der aktuellen Runde
 
   const handleAnswer = (answer) => {
     const lowerHundred = Math.floor(currentNumber / 100) * 100;
@@ -78,9 +79,10 @@ const Game = ({ highScore, updateHighScore, onGameOver }) => {
       nextQuestion();
     } else {
       setMistakeCount((prev) => prev + 1);
-      setIsAnswering(false);
+      setIsWrongAnswer(true); // Rot anzeigen
+      setIsAnswering(false); // Pause
       setTimeout(() => {
-        alert("Falsche Antwort. Versuch es erneut!");
+        setIsWrongAnswer(false); // Hintergrund zurücksetzen
         setIsAnswering(true);
       }, 2000);
     }
@@ -89,31 +91,27 @@ const Game = ({ highScore, updateHighScore, onGameOver }) => {
   const nextQuestion = () => {
     if (questionNumber === 25) {
       const endTime = Date.now();
-      const roundTime = (endTime - startTime) / 1000;
-      setTimeTaken(roundTime);
+      const totalTime = (endTime - startTime) / 1000; // Zeit der Runde
+      setRoundTime(totalTime);
 
       const totalRounds = highScore.totalRounds + 1;
       const totalMistakes = highScore.totalMistakes + mistakeCount;
 
       if (
         correctCount > highScore.score ||
-        (correctCount === highScore.score && roundTime < highScore.time)
+        (correctCount === highScore.score && totalTime < highScore.time)
       ) {
         const playerName = prompt("Neuer Rekord! Bitte gib deinen Namen ein:");
         updateHighScore({
           name: playerName,
-          score: correctCount + 1, // letzte Runde mitzählen
-          time: roundTime,
+          score: correctCount + 1, // Letzte Runde mitzählen
+          time: totalTime,
           totalRounds,
           totalMistakes,
         });
       } else {
         alert("Kein neuer Rekord.");
-        updateHighScore({
-          ...highScore,
-          totalRounds,
-          totalMistakes,
-        });
+        updateHighScore({ ...highScore, totalRounds, totalMistakes });
       }
 
       onGameOver();
@@ -127,7 +125,12 @@ const Game = ({ highScore, updateHighScore, onGameOver }) => {
   const upperHundred = lowerHundred + 100;
 
   return (
-    <div>
+    <div
+      style={{
+        ...styles.gameContainer,
+        backgroundColor: isWrongAnswer ? "#FFCCCC" : "white", // Rot bei falscher Antwort
+      }}
+    >
       <h2 style={styles.subTitle}>Frage {questionNumber}/25</h2>
       <h3 style={styles.question}>
         Welche Hunderterzahl liegt näher an {currentNumber}?
@@ -159,13 +162,17 @@ const Result = ({ highScore, onRestart, onResetHighScore }) => {
         <strong>Aktuelle Runde:</strong> <br />
         - Richtige Antworten: {highScore.score} <br />
         - Fehler: {highScore.totalMistakes} <br />
-        - Benötigte Zeit:{" "}
+        - Zeit der aktuellen Runde:{" "}
         {highScore.time === Infinity
           ? "—"
-          : highScore.time.toFixed(2) + " Sekunden"}
+          : highScore.time.toFixed(2) + " Sekunden"}{" "}
         <br />
         <strong>Highscore:</strong> <br />
         Name: {highScore.name || "—"} <br />
+        Beste Zeit:{" "}
+        {highScore.time === Infinity
+          ? "—"
+          : highScore.time.toFixed(2) + " Sekunden"}
       </p>
       <div style={styles.buttonContainer}>
         <button style={styles.button} onClick={onRestart}>
@@ -196,6 +203,11 @@ const styles = {
   question: {
     fontSize: "18px",
     marginBottom: "20px",
+  },
+  gameContainer: {
+    transition: "background-color 0.5s",
+    padding: "20px",
+    borderRadius: "8px",
   },
   buttonContainer: {
     display: "flex",
