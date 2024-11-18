@@ -55,11 +55,16 @@ const Game = ({ highScore, updateHighScore, onGameOver }) => {
   const [questionNumber, setQuestionNumber] = useState(1);
   const [correctCount, setCorrectCount] = useState(0);
   const [mistakeCount, setMistakeCount] = useState(0);
-  const [startTime] = useState(Date.now()); // Startzeit der gesamten Runde
   const [currentNumber, setCurrentNumber] = useState(generateRandomNumber());
   const [isAnswering, setIsAnswering] = useState(true);
   const [isWrongAnswer, setIsWrongAnswer] = useState(false); // Für roten Hintergrund
   const [roundTime, setRoundTime] = useState(0); // Speichert die Zeit der aktuellen Runde
+  const [startTime, setStartTime] = useState(0); // Startzeit der aktuellen Runde
+
+  // Startet die Runde (Setzt die Startzeit für die Runde)
+  useEffect(() => {
+    setStartTime(Date.now()); // Startzeit der Runde wird gesetzt, wenn ein neues Spiel startet
+  }, [questionNumber]);
 
   const handleAnswer = (answer) => {
     const lowerHundred = Math.floor(currentNumber / 100) * 100;
