@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 const App = () => {
   const [highScore, setHighScore] = useState(
@@ -58,13 +58,12 @@ const Game = ({ highScore, updateHighScore, onGameOver }) => {
   const [startTime] = useState(Date.now());
   const [currentNumber, setCurrentNumber] = useState(generateRandomNumber());
   const [isAnswering, setIsAnswering] = useState(true);
-  const [timeTaken, setTimeTaken] = useState(0); // Aktuelle Rundenzeit
+  const [timeTaken, setTimeTaken] = useState(0);
 
   const handleAnswer = (answer) => {
     const lowerHundred = Math.floor(currentNumber / 100) * 100;
     const upperHundred = lowerHundred + 100;
 
-    // Rundungslogik: Bei 50 wird der größere Hunderter genommen
     const distanceToLower = Math.abs(currentNumber - lowerHundred);
     const distanceToUpper = Math.abs(currentNumber - upperHundred);
     const correctAnswer =
@@ -79,7 +78,7 @@ const Game = ({ highScore, updateHighScore, onGameOver }) => {
       nextQuestion();
     } else {
       setMistakeCount((prev) => prev + 1);
-      setIsAnswering(false); // Pause für 2 Sekunden
+      setIsAnswering(false);
       setTimeout(() => {
         alert("Falsche Antwort. Versuch es erneut!");
         setIsAnswering(true);
@@ -103,14 +102,18 @@ const Game = ({ highScore, updateHighScore, onGameOver }) => {
         const playerName = prompt("Neuer Rekord! Bitte gib deinen Namen ein:");
         updateHighScore({
           name: playerName,
-          score: correctCount,
+          score: correctCount + 1, // letzte Runde mitzählen
           time: roundTime,
           totalRounds,
           totalMistakes,
         });
       } else {
         alert("Kein neuer Rekord.");
-        updateHighScore({ ...highScore, totalRounds, totalMistakes });
+        updateHighScore({
+          ...highScore,
+          totalRounds,
+          totalMistakes,
+        });
       }
 
       onGameOver();
@@ -155,16 +158,14 @@ const Result = ({ highScore, onRestart, onResetHighScore }) => {
       <p style={styles.resultText}>
         <strong>Aktuelle Runde:</strong> <br />
         - Richtige Antworten: {highScore.score} <br />
+        - Fehler: {highScore.totalMistakes} <br />
         - Benötigte Zeit:{" "}
         {highScore.time === Infinity
           ? "—"
-          : highScore.time.toFixed(2) + " Sekunden"}{" "}
-        <br />
-        - Fehler: {highScore.totalMistakes}
+          : highScore.time.toFixed(2) + " Sekunden"}
         <br />
         <strong>Highscore:</strong> <br />
-        Name: {highScore.name || "—"}
-        <br />
+        Name: {highScore.name || "—"} <br />
       </p>
       <div style={styles.buttonContainer}>
         <button style={styles.button} onClick={onRestart}>
