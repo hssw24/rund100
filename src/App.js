@@ -96,7 +96,7 @@ const Game = ({ highScore, updateHighScore, onGameOver }) => {
   const nextQuestion = () => {
     if (questionNumber === 25) {
       const endTime = Date.now();
-      const totalTime = (endTime - startTime) / 1000; // Zeit der Runde
+      const totalTime = (endTime - startTime) / 1000; // Zeit der Runde in Sekunden
       setRoundTime(totalTime); // Speichert die Zeit der aktuellen Runde
 
       const totalRounds = highScore.totalRounds + 1;
