@@ -55,7 +55,7 @@ const Game = ({ highScore, updateHighScore, onGameOver }) => {
   const [questionNumber, setQuestionNumber] = useState(1);
   const [correctCount, setCorrectCount] = useState(0);
   const [mistakeCount, setMistakeCount] = useState(0);
-  const [startTime] = useState(Date.now());
+  const [startTime] = useState(Date.now()); // Startzeit der gesamten Runde
   const [currentNumber, setCurrentNumber] = useState(generateRandomNumber());
   const [isAnswering, setIsAnswering] = useState(true);
   const [isWrongAnswer, setIsWrongAnswer] = useState(false); // Für roten Hintergrund
@@ -92,7 +92,7 @@ const Game = ({ highScore, updateHighScore, onGameOver }) => {
     if (questionNumber === 25) {
       const endTime = Date.now();
       const totalTime = (endTime - startTime) / 1000; // Zeit der Runde
-      setRoundTime(totalTime);
+      setRoundTime(totalTime); // Speichert die Zeit der aktuellen Runde
 
       const totalRounds = highScore.totalRounds + 1;
       const totalMistakes = highScore.totalMistakes + mistakeCount;
