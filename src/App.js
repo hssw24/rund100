@@ -24,13 +24,13 @@ const App = () => {
 };
 
 const Game = ({ highScore, updateHighScore, onGameOver }) => {
+  const generateRandomNumber = () => Math.floor(Math.random() * 1001);
+
   const [questionNumber, setQuestionNumber] = useState(1);
   const [correctCount, setCorrectCount] = useState(0);
   const [startTime] = useState(Date.now());
   const [currentNumber, setCurrentNumber] = useState(generateRandomNumber());
   const [results, setResults] = useState([]);
-
-  const generateRandomNumber = () => Math.floor(Math.random() * 1001);
 
   const handleAnswer = (answer) => {
     const lowerHundred = Math.floor(currentNumber / 100) * 100;
