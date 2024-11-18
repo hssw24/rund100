@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const App = () => {
   const [highScore, setHighScore] = useState(
@@ -40,7 +40,7 @@ const Game = ({ highScore, updateHighScore, onGameOver }) => {
   const [correctCount, setCorrectCount] = useState(0);
   const [startTime] = useState(Date.now());
   const [currentNumber, setCurrentNumber] = useState(generateRandomNumber());
-  const [results, setResults] = useState([]);
+  const [isAnswering, setIsAnswering] = useState(true);
 
   const handleAnswer = (answer) => {
     const lowerHundred = Math.floor(currentNumber / 100) * 100;
@@ -49,20 +49,29 @@ const Game = ({ highScore, updateHighScore, onGameOver }) => {
       ? lowerHundred
       : upperHundred;
 
-    const isCorrect = answer === correctAnswer;
-    setResults((prev) => [...prev, isCorrect]);
-    if (isCorrect) setCorrectCount((prev) => prev + 1);
+    if (answer === correctAnswer) {
+      setCorrectCount((prev) => prev + 1);
+      nextQuestion();
+    } else {
+      setIsAnswering(false); // Pause für 2 Sekunden
+      setTimeout(() => {
+        alert("Falsche Antwort. Versuch es erneut!");
+        setIsAnswering(true);
+      }, 2000);
+    }
+  };
 
+  const nextQuestion = () => {
     if (questionNumber === 25) {
       const endTime = Date.now();
       const timeTaken = (endTime - startTime) / 1000;
 
       if (
-        correctCount + (isCorrect ? 1 : 0) > highScore.score ||
-        (correctCount + (isCorrect ? 1 : 0) === highScore.score && timeTaken < highScore.time)
+        correctCount > highScore.score ||
+        (correctCount === highScore.score && timeTaken < highScore.time)
       ) {
         const playerName = prompt("Neuer Rekord! Bitte gib deinen Namen ein:");
-        updateHighScore({ name: playerName, score: correctCount + (isCorrect ? 1 : 0), time: timeTaken });
+        updateHighScore({ name: playerName, score: correctCount, time: timeTaken });
       } else {
         alert("Kein neuer Rekord.");
       }
@@ -82,10 +91,10 @@ const Game = ({ highScore, updateHighScore, onGameOver }) => {
       <h2 style={styles.subTitle}>Frage {questionNumber}/25</h2>
       <h3 style={styles.question}>Welche Hunderterzahl liegt näher an {currentNumber}?</h3>
       <div style={styles.buttonContainer}>
-        <button style={styles.button} onClick={() => handleAnswer(lowerHundred)}>
+        <button style={styles.button} onClick={() => isAnswering && handleAnswer(lowerHundred)}>
           {lowerHundred}
         </button>
-        <button style={styles.button} onClick={() => handleAnswer(upperHundred)}>
+        <button style={styles.button} onClick={() => isAnswering && handleAnswer(upperHundred)}>
           {upperHundred}
         </button>
       </div>
