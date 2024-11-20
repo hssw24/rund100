@@ -31,7 +31,7 @@ const App = () => {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>Welcher Hunderter liegt näher?</h1>
+      <h1 style={styles.title}>Klasse 3c, welcher Hunderter liegt näher?</h1>
       {showGame ? (
         <Game
           highScore={highScore}
@@ -161,7 +161,7 @@ const Result = ({ highScore, onRestart, onResetHighScore }) => {
       <p style={styles.resultText}>
         <strong>Aktuelle Runde:</strong> <br />
         - Richtige Antworten: {highScore.score} <br />
-        - Fehler: {highScore.totalMistakes} <br />
+        - Gesamtfehler: {highScore.totalMistakes} <br />
         - Zeit der aktuellen Runde:{" "}
         {highScore.time === Infinity
           ? "—"
